@@ -1,0 +1,12 @@
+[package]
+name = "yojimbo_token"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+anchor-lang = "0.26.0"
+anchor-spl = "0.26.0"
+spl-token = { version = "3.5.0", features = ["no-entrypoint"] }
+
+[lib]
+crate-type = ["cdylib", "lib"]

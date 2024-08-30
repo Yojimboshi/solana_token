@@ -1,0 +1,35 @@
+# Ignore macOS system files
+.DS_Store
+
+# Node.js dependencies
+node_modules/
+
+# Rust build artifacts
+target/
+**/*.rs.bk
+
+# Anchor artifacts
+.anchor/
+Anchor.toml.lock
+
+# Output binary files
+*.so
+
+# Output of Anchor CLI
+dist/
+*.log
+
+# Solana files
+*.keypair
+*.keys
+
+# Generated keys or wallet files
+*.json
+*.p12
+
+# Ignore other temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~

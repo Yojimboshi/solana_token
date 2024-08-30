@@ -1,0 +1,9 @@
+[programs.devnet]
+yojimbo_token  = "DyDZc7yUV4y8Qbtr1xKeQujBbAi1DTx5J5t5B5vVn441"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "https://api.devnet.solana.com"
+wallet = "wallet-keypair.json"
