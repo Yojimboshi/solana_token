@@ -2,12 +2,14 @@ const anchor = require('@project-serum/anchor');
 const { PublicKey, Keypair } = require('@solana/web3.js');
 const fs = require('fs');
 
+const uri = "https://gist.githubusercontent.com/Yojimboshi/ac4b533e93ea325a405abf53782986fe/raw/e499871ecb3f61e79e214969b42bedf8bb32cdb3/yojimbo.json";
+
 (async () => {
     try {
         // Load the keypair directly from the wallet-keypair.json file in the project directory
         console.log("Loading wallet keypair...");
         const walletKeypair = Keypair.fromSecretKey(
-            Uint8Array.from(JSON.parse(fs.readFileSync('./wallet-keypair.json', 'utf8')))
+            Uint8Array.from(JSON.parse(fs.readFileSync('./wallet_keypair.json', 'utf8')))
         );
         console.log("Wallet public key:", walletKeypair.publicKey.toBase58());
 
@@ -20,7 +22,7 @@ const fs = require('fs');
         anchor.setProvider(provider);
         console.log("Provider configured.");
 
-        const programId = new PublicKey("DyDZc7yUV4y8Qbtr1xKeQujBbAi1DTx5J5t5B5vVn441");
+        const programId = new PublicKey("GovehySW7tKTH2G3GaBFHXsz8cmgodwmrkWSFKSuzHup");
 
         console.log("Loading IDL from file...");
         const idl = JSON.parse(fs.readFileSync('./target/idl/yojimbo_token.json', 'utf8'));
@@ -29,23 +31,23 @@ const fs = require('fs');
         const program = new anchor.Program(idl, programId, provider);
         console.log("Program initialized.");
 
+        // Use walletKeypair for mint, metadata, and authority
         const mintKeypair = Keypair.fromSecretKey(
             Uint8Array.from(JSON.parse(fs.readFileSync('./mint-keypair.json', 'utf8')))
         );
-        console.log("Mint keypair loaded. Public key:", mintKeypair.publicKey.toBase58());
 
-        const metadataKeypair = Keypair.fromSecretKey(
-            Uint8Array.from(JSON.parse(fs.readFileSync('./metadata-keypair.json', 'utf8')))
-        );
-        console.log("Metadata keypair loaded. Public key:", metadataKeypair.publicKey.toBase58());
+        const metadataKeypair = mintKeypair;
+
 
         console.log("Calling initializeMint...");
         const tx = await program.methods
             .initializeMint(
                 "YOJIMBO",
                 "JIMBO",
-                "https://img1.yeggi.com/page_images_cache/8155453_3d-file-yojimbo-movie-medallion-yojimbo-3d-model-stl-obj-to-download-",
-                new anchor.BN(1000000)
+                uri,  // Metadata URI passed correctly as a string
+                new anchor.BN(1000000), // Hard cap of 1 million units
+                8, // Decimals
+                walletKeypair.publicKey // Freeze authority
             )
             .accounts({
                 mint: mintKeypair.publicKey,
@@ -53,8 +55,9 @@ const fs = require('fs');
                 authority: walletKeypair.publicKey,
                 systemProgram: anchor.web3.SystemProgram.programId,
                 rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+                tokenMetadataProgram: new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s") // Metaplex Token Metadata program ID
             })
-            .signers([walletKeypair, mintKeypair, metadataKeypair])
+            .signers([walletKeypair,mintKeypair])
             .rpc();
 
         console.log("Transaction Signature:", tx);
