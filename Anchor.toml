@@ -1,5 +1,5 @@
 [programs.devnet]
-yojimbo_token  = "GovehySW7tKTH2G3GaBFHXsz8cmgodwmrkWSFKSuzHup"
+yojimbo_token  = "6Ncnr6PZ56bZttPL9bW6FHRgwAK3ZxTCAvp8BbxvryHE"
 
 [registry]
 url = "https://anchor.projectserum.com"

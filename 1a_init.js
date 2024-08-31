@@ -13,7 +13,7 @@ const provider = new anchor.AnchorProvider(connection, wallet, { commitment: "co
 anchor.setProvider(provider);
 
 const idl = JSON.parse(fs.readFileSync("target/idl/yojimbo_token.json", "utf8"));
-const programId = new PublicKey("GovehySW7tKTH2G3GaBFHXsz8cmgodwmrkWSFKSuzHup");
+const programId = new PublicKey("6Ncnr6PZ56bZttPL9bW6FHRgwAK3ZxTCAvp8BbxvryHE");
 const program = new anchor.Program(idl, programId, provider);
 
 // Load your mint and metadata keypairs

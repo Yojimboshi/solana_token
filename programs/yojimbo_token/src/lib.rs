@@ -4,7 +4,7 @@ use anchor_spl::token::{self, MintTo, Token, TokenAccount};
 use mpl_token_metadata::{instruction as token_instruction, state::Creator};
 use spl_token::state::Mint as SplMint;
 
-declare_id!("GovehySW7tKTH2G3GaBFHXsz8cmgodwmrkWSFKSuzHup");
+declare_id!("6Ncnr6PZ56bZttPL9bW6FHRgwAK3ZxTCAvp8BbxvryHE");
 
 #[program]
 pub mod yojimbo_token {
@@ -93,12 +93,10 @@ pub mod yojimbo_token {
 #[derive(Accounts)]
 pub struct InitializeMint<'info> {
     #[account(init, payer = authority, space = 100)]
-    // Adding surplus space to the calculated 83 bytes
     pub mint: Account<'info, CustomMint>,
     #[account(mut)]
     pub authority: Signer<'info>,
-    #[account(init, payer = authority, seeds = [b"metadata", mint.key().as_ref()], bump, space = 500)]
-    // Adding surplus space to the metadata account
+    #[account(init, payer = authority, space = 500)] // Remove seeds constraint
     pub metadata: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,

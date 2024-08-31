@@ -6,23 +6,19 @@ const uri = "https://gist.githubusercontent.com/Yojimboshi/ac4b533e93ea325a405ab
 
 (async () => {
     try {
-        // Load the keypair directly from the wallet-keypair.json file in the project directory
-        console.log("Loading wallet keypair...");
         const walletKeypair = Keypair.fromSecretKey(
             Uint8Array.from(JSON.parse(fs.readFileSync('./wallet_keypair.json', 'utf8')))
         );
-        console.log("Wallet public key:", walletKeypair.publicKey.toBase58());
 
-        // Configure the client to use the loaded keypair as the wallet
         const provider = new anchor.AnchorProvider(
             new anchor.web3.Connection(anchor.web3.clusterApiUrl('devnet')),
             new anchor.Wallet(walletKeypair),
             { preflightCommitment: 'processed' }
         );
         anchor.setProvider(provider);
-        console.log("Provider configured.");
 
-        const programId = new PublicKey("GovehySW7tKTH2G3GaBFHXsz8cmgodwmrkWSFKSuzHup");
+        const programId = new PublicKey("6Ncnr6PZ56bZttPL9bW6FHRgwAK3ZxTCAvp8BbxvryHE");
+        console.log("Program ID:", programId.toBase58());
 
         console.log("Loading IDL from file...");
         const idl = JSON.parse(fs.readFileSync('./target/idl/yojimbo_token.json', 'utf8'));
@@ -31,23 +27,24 @@ const uri = "https://gist.githubusercontent.com/Yojimboshi/ac4b533e93ea325a405ab
         const program = new anchor.Program(idl, programId, provider);
         console.log("Program initialized.");
 
-        // Use walletKeypair for mint, metadata, and authority
         const mintKeypair = Keypair.fromSecretKey(
             Uint8Array.from(JSON.parse(fs.readFileSync('./mint-keypair.json', 'utf8')))
         );
+        console.log("Mint keypair public key:", mintKeypair.publicKey.toBase58());
 
-        const metadataKeypair = mintKeypair;
+        const metadataKeypair = Keypair.fromSecretKey(
+            Uint8Array.from(JSON.parse(fs.readFileSync('./metadata-keypair.json', 'utf8')))
+        );
+        console.log("Metadata keypair public key:", metadataKeypair.publicKey.toBase58());
 
-
-        console.log("Calling initializeMint...");
         const tx = await program.methods
             .initializeMint(
                 "YOJIMBO",
                 "JIMBO",
-                uri,  // Metadata URI passed correctly as a string
-                new anchor.BN(1000000), // Hard cap of 1 million units
-                8, // Decimals
-                walletKeypair.publicKey // Freeze authority
+                uri,
+                new anchor.BN(1000000),
+                8,
+                walletKeypair.publicKey
             )
             .accounts({
                 mint: mintKeypair.publicKey,
@@ -55,14 +52,19 @@ const uri = "https://gist.githubusercontent.com/Yojimboshi/ac4b533e93ea325a405ab
                 authority: walletKeypair.publicKey,
                 systemProgram: anchor.web3.SystemProgram.programId,
                 rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-                tokenMetadataProgram: new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s") // Metaplex Token Metadata program ID
+                tokenMetadataProgram: new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
             })
-            .signers([walletKeypair,mintKeypair])
+            .signers([walletKeypair, mintKeypair, metadataKeypair])
             .rpc();
 
         console.log("Transaction Signature:", tx);
 
     } catch (error) {
-        console.error("An error occurred:", error);
+        console.error("An error occurred:");
+        if (error.logs) {
+            console.error("Transaction logs:", error.logs.join("\n"));
+        } else {
+            console.error(error.message);
+        }
     }
 })();
